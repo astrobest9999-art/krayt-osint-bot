@@ -101,9 +101,46 @@ async def lookup_ip(e, target):
                   + f"\n\nКарта: {map_url}")
 
 async def run_sherlock(username):
-    # ВРЕМЕННАЯ ЗАГЛУШКА ДЛЯ ОБЛАКА
-    return f"Sherlock временно отключен в облаке. Поиск {username} недоступен."
-
+    # Список сайтов для проверки (URL, где {username} заменится на ник)
+    sites = {
+        "GitHub": "https://github.com/{}",
+        "Instagram": "https://www.instagram.com/{}",
+        "TikTok": "https://www.tiktok.com/@{}",
+        "Twitter/X": "https://x.com/{}",
+        "VK": "https://vk.com/{}",
+        "Steam": "https://steamcommunity.com/id/{}",
+        "Pinterest": "https://www.pinterest.com/{}",
+        "Reddit": "https://www.reddit.com/user/{}",
+        "Twitch": "https://www.twitch.tv/{}",
+        "Telegram": "https://t.me/{}",
+        "YouTube": "https://www.youtube.com/@{}",
+        "SoundCloud": "https://soundcloud.com/{}",
+        "Flickr": "https://www.flickr.com/people/{}",
+        "Tumblr": "https://{}.tumblr.com",
+        "Habr": "https://habr.com/ru/users/{}/"
+    }
+    
+    found = []
+    # Используем стандартные заголовки, чтобы сайты не блокировали запрос
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+    
+    for name, url_template in sites.items():
+        url = url_template.format(username)
+        try:
+            # Делаем быстрый запрос (таймаут 3 секунды)
+            response = requests.get(url, headers=headers, timeout=3)
+            if response.status_code == 200:
+                found.append(f"{name}: {url}")
+        except Exception:
+            pass # Если сайт не отвечает, просто пропускаем
+            
+    if not found:
+        return "Ничего не найдено. Возможно, ник свободен или скрыт."
+        
+    result = "Найдено на платформах:\n" + "\n".join(found[:10])
+    if len(found) > 10:
+        result += f"\n\n...и ещё {len(found) - 10} сайтов."
+    return result
 def is_ip(text):
     parts = text.split(".")
     return len(parts) == 4 and all(p.isdigit() and 0 <= int(p) <= 255 for p in parts)
