@@ -1,0 +1,5 @@
+telethon
+phonenumbers
+requests
+telegraph
+flask
